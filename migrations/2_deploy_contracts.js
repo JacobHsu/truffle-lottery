@@ -1,8 +1,11 @@
-const ConvertLib = artifacts.require("ConvertLib");
-const MetaCoin = artifacts.require("MetaCoin");
+const LotteryCoin = artifacts.require("LotteryCoin");
+const LotteryShop = artifacts.require("LotteryShop");
 
 module.exports = function(deployer) {
-  deployer.deploy(ConvertLib);
-  deployer.link(ConvertLib, MetaCoin);
-  deployer.deploy(MetaCoin);
+  // deployer.deploy(LotteryCoin);
+  // deployer.deploy(LotteryShop, LotteryCoin.address);
+
+  deployer.deploy(LotteryCoin).then(function() {
+    return deployer.deploy(LotteryShop, LotteryCoin.address);
+  });
 };
