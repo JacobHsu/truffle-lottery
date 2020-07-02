@@ -24,7 +24,7 @@ const App = {
       const accounts = await web3.eth.getAccounts();
       this.account = accounts[0];
 
-            this.shop = new web3.eth.Contract(
+      this.shop = new web3.eth.Contract(
         shop_artifacts.abi,
         shop_artifacts.networks[networkId].address,
       );
@@ -89,9 +89,10 @@ const App = {
   },
 
   loadBasicInfo :async function (){
+    // 在JS代码中可以直接使用owner这个自动生成的接口访问智能合约中的address类型的owner
     const {owner} = this.coin.methods;
-
     const adminAddr = await owner().call()
+    //  如果当前登录的账户this.account与owner相同，则说明当前登录的用户为管理员
     if (this.account == adminAddr){
       $("#admin-area").show()
     }else{
@@ -112,7 +113,7 @@ const App = {
       alert("无效的金额")
       return
     }
-    console.warn(this.web3.utils.toWei(no, "ether"))
+    console.warn(this.web3.utils.toWei(no, "ether"), this.account )
 
     buy().send({value:this.web3.utils.toWei(no, "ether"), from: this.account
       }).on('error', function(error){
@@ -144,7 +145,7 @@ const App = {
     }
 
     const {bet} = this.shop.methods
-
+console.log( 'bidThisPhase', this.account, bidStr, this.web3.utils.utf8ToHex(bidStr), sum )
     bet(this.web3.utils.utf8ToHex(bidStr), sum).send({from:this.account}).on(
         'transactionHash', (hash) =>{
           console.warn("hash", hash)

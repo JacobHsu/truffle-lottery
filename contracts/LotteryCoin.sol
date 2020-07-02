@@ -21,16 +21,19 @@ contract LotteryCoin is owned, TokenERC20 {
     }
 
     /* Internal transfer, only can be called by this contract */
-    function _transfer(address _from, address _to, uint _value) internal {
+    // function _transfer(address _from, address _to, uint _value) internal {
+    function transfer(address _from, address _to, uint _value) internal {
+        // balanceOf from TokenERC20
         require (_to != address(0x0));                          // Prevent transfer to 0x0 address. Use burn() instead
-        require (balanceOf[_from] >= _value);                   // Check if the sender has enough
-        require (balanceOf[_to] + _value >= balanceOf[_to]);    // Check for overflows
-        require(!frozenAccount[_from]);                         // Check if sender is frozen
-        require(!frozenAccount[_to]);                           // Check if recipient is frozen
-        balanceOf[_from] -= _value;                             // Subtract from the sender
-        balanceOf[_to] += _value;                               // Add the same to the recipient
+        require (balanceOf[_from] >= _value, 'Check if the sender has enough'); // Check if the sender has enough
+        // require (balanceOf[_to] + _value >= balanceOf[_to]);    // Check for overflows
+        // require(!frozenAccount[_from]);                         // Check if sender is frozen
+        // require(!frozenAccount[_to]);                           // Check if recipient is frozen
+        // balanceOf[_from] -= _value;                             // Subtract from the sender
+        // balanceOf[_to] += _value;                               // Add the same to the recipient
         emit Transfer(_from, _to, _value);
     }
+
     function mintToken(address target, uint256 mintedAmount) onlyOwner public {
         balanceOf[target] += mintedAmount;
         totalSupply += mintedAmount;
@@ -48,17 +51,18 @@ contract LotteryCoin is owned, TokenERC20 {
         buyPrice = newBuyPrice;
     }
 
+    // 购买时，需要根据token的精度，通过ETH购买token 
     // msg.sender是购买token者的区块链地址，它是token的接收者，而token的发送者是address（this），该地址是token合约的地址，而不是部署合约的账户AAA
     function buy() payable public {
         uint amount = msg.value / buyPrice * 10 ** uint256(decimals);
-        _transfer(address(this), msg.sender, amount);
+        transfer(address(this), msg.sender, amount);
     }
 
     function sell(uint256 a) public {
         address myAddress = address(this);
         uint256 amount = a * 10 ** uint256(decimals);
         require(myAddress.balance >= amount * sellPrice);   // checks if the contract has enough ether to buy
-        _transfer(msg.sender, address(this), amount);       // makes the transfers
+        transfer(msg.sender, address(this), amount);       // makes the transfers
         msg.sender.transfer(amount * sellPrice);            // sends ether to the seller. It's important to do this last to avoid recursion attacks
     }
 }

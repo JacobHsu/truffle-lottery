@@ -45,7 +45,7 @@ contract LotteryShop is owned{
 
         betForUser[msg.sender].push(item);
 
-        tokenReward.transfer(address(this), sum);
+        // tokenReward.transfer(address(this), sum);
 
         emit Bet(msg.sender, betStr, sum);
     }
