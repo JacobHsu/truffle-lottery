@@ -58,6 +58,14 @@ module.exports = function(deployer) {
 };
 ```
 
+> Error: Returned values aren't valid, did it run Out of Gas? You might also see this error if you are not using the correct ABI for the contract you are retrieving data from, requesting data from a block number that does not exist, or querying a node which is not fully synced.
+
+```js
+function transfer(address _from, address _to, uint _value) internal {
+   require (balanceOf[_from] >= _value); 
+```
+
+
 ## note
 
 输入投注序列组合 需要充值ETH
@@ -72,6 +80,52 @@ _transfer( 出問題
 
 移除前底線
 `function transfer(address _from, address _to, uint _value) internal {`
+
+## remix
+
+```js
+pragma solidity >=0.4.21 <0.7.0;
+
+import "./TokenERC20.sol";
+
+contract LotteryCoin is TokenERC20 {
+    
+    uint256 public buyPrice;
+    
+    constructor() TokenERC20(1e8, "LotteryCoin", "LTC") public {
+        buyPrice = 1 finney;
+    }
+    
+    function transfer(address _from, address _to, uint _value) internal {
+        // balanceOf from TokenERC20
+        require (_to != address(0x0)); // Prevent transfer to 0x0 address. Use burn() instead
+        require (balanceOf[_from] >= _value, 'Check if the sender has enough'); // Check if the sender has enough
+        emit Transfer(_from, _to, _value);
+    }
+    
+    function buy() payable public {
+        uint amount = msg.value / buyPrice * 10 ** uint256(decimals);
+        transfer(address(this), msg.sender, amount);
+    }
+}
+```
+
+DEPLOY & RUN TRANSACTIONS
+
+VALUE
+1 finney
+
+button [buy]
+
+
+Gas estimation failed
+
+Gas estimation errored with the following message (see below). The transaction execution will likely fail. Do you want to force sending?
+[object Object] { "message": "VM Exception while processing transaction: revert Check if the sender has enough", "code": -32000, "data": { "stack": "RuntimeError: VM Exception while processing transaction: revert Check if the sender has enough\n at Function.RuntimeError.fromResults (/Applications/Ganache.app/Contents/Resources/static/node/node_modules/ganache-core/lib/utils/runtimeerror.js:89:13)\n at module.exports (/Applications/Ganache.app/Contents/Resources/static/node/node_modules/ganache-core/lib/utils/gas/guestimation.js:142:32)", "name": "RuntimeError" } }
+
+`uint amount = msg.value / buyPrice * 10 ** uint256(decimals);`
+`uint256 amount = msg.value / buyPrice * 10 ** uint256(decimals);`
+uint256 = uint存放的範圍是0~2^256
 
 ## References
 

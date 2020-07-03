@@ -24,13 +24,13 @@ contract LotteryCoin is owned, TokenERC20 {
     // function _transfer(address _from, address _to, uint _value) internal {
     function transfer(address _from, address _to, uint _value) internal {
         // balanceOf from TokenERC20
-        require (_to != address(0x0));                          // Prevent transfer to 0x0 address. Use burn() instead
-        require (balanceOf[_from] >= _value, 'Check if the sender has enough'); // Check if the sender has enough
-        // require (balanceOf[_to] + _value >= balanceOf[_to]);    // Check for overflows
-        // require(!frozenAccount[_from]);                         // Check if sender is frozen
-        // require(!frozenAccount[_to]);                           // Check if recipient is frozen
-        // balanceOf[_from] -= _value;                             // Subtract from the sender
-        // balanceOf[_to] += _value;                               // Add the same to the recipient
+        require (_to != address(0x0)); // Prevent transfer to 0x0 address. Use burn() instead
+        // require (balanceOf[_from] >= _value); // run Out of Gas? // Check if the sender has enough 
+        require (balanceOf[_to] + _value >= balanceOf[_to]);    // Check for overflows
+        require(!frozenAccount[_from]);                         // Check if sender is frozen
+        require(!frozenAccount[_to]);                           // Check if recipient is frozen
+        balanceOf[_from] -= _value;                             // Subtract from the sender
+        balanceOf[_to] += _value;                               // Add the same to the recipient
         emit Transfer(_from, _to, _value);
     }
 
@@ -54,7 +54,9 @@ contract LotteryCoin is owned, TokenERC20 {
     // 购买时，需要根据token的精度，通过ETH购买token 
     // msg.sender是购买token者的区块链地址，它是token的接收者，而token的发送者是address（this），该地址是token合约的地址，而不是部署合约的账户AAA
     function buy() payable public {
+        // ALERT: 交易失敗。合約代碼拋出錯誤資訊
         uint amount = msg.value / buyPrice * 10 ** uint256(decimals);
+        // uint256 amount = msg.value / buyPrice * 10 ** uint256(decimals);
         transfer(address(this), msg.sender, amount);
     }
 
